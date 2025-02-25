@@ -22,7 +22,7 @@
           extraInstallCommands =
             let
               contents = pkgs.appimageTools.extract { inherit pname version src; };
-            in 
+            in
             ''
               install -m 444 -D ${contents}/${pname}.desktop -t $out/share/applications
               substituteInPlace $out/share/applications/${pname}.desktop \
