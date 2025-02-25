@@ -29,7 +29,7 @@ To install Cursor using this flake, follow these steps:
    {
      inputs = {
        nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; # Note that nixos unstable channel is required
-       cursor.url = "github:rishabh5321/cursor-flake/main";
+       cursor-flake.url = "github:Rishabh5321/cursor-flake";
      };
 
      outputs = { self, nixpkgs, cursor }: {
