@@ -1,5 +1,5 @@
 {
-  description = "Flake for Cursor";
+  description = "Cursor";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

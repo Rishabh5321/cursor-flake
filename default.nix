@@ -1,17 +1,21 @@
-{ pkgs, appimageTools, ... }:
-
+# Code from https://gist.github.com/lukalot/fcbf3216ad13b8303ab0947af0d5abd5
+{ pkgs, ... }:
 let
   pname = "cursor";
-  version = "0.40.4";
-  appKey = "230313mzl4w4u92";
-  buildKey = "2409052yfcjagw2";
+  version = "0.45.15";
 
   src = pkgs.fetchurl {
-    url = "https://download.todesktop.com/${appKey}/cursor-${version}-build-${buildKey}-x86_64.AppImage";
-    hash = "sha256-ZURE8UoLPw+Qo1e4xuwXgc+JSwGrgb/6nfIGXMacmSg=";
+    # this will break if the version is updated.
+    # unfortunately, i couldn't seem to find a url that
+    # points to a specific version.
+    # alternatively, download the appimage manually and
+    # include it via src = ./cursor.AppImage, instead of fetchurl
+    url = "https://downloader.cursor.sh/linux/appImage/x64";
+    hash = "sha256-5MGWJi8TP+13jZf6YMMUU5uYY/3OBTFxtGpirvgj8ZI=";
   };
-  appimageContents = appimageTools.extract { inherit pname version src; };
+  appimageContents = pkgs.appimageTools.extract { inherit pname version src; };
 in
+with pkgs;
 appimageTools.wrapType2 {
   inherit pname version src;
 
@@ -21,6 +25,7 @@ appimageTools.wrapType2 {
       --replace-quiet 'Exec=AppRun' 'Exec=${pname}'
     cp -r ${appimageContents}/usr/share/icons $out/share
 
+    # Ensure the binary exists and create a symlink if it doesn't already exist
     if [ -e ${appimageContents}/AppRun ]; then
       install -m 755 -D ${appimageContents}/AppRun $out/bin/${pname}-${version}
       if [ ! -L $out/bin/${pname} ]; then
@@ -32,16 +37,17 @@ appimageTools.wrapType2 {
     fi
   '';
 
-  extraBwrapArgs = [
-    "--bind-try /etc/nixos/ /etc/nixos/"
-  ];
+  extraBwrapArgs = [ "--bind-try /etc/nixos/ /etc/nixos/" ];
 
+  # vscode likes to kill the parent so that the
+  # gui application isn't attached to the terminal session
   dieWithParent = false;
 
-  extraPkgs = pkgs: with pkgs; [
+  extraPkgs = _pkgs: [
     unzip
     autoPatchelfHook
     asar
+    # override doesn't preserve splicing https://github.com/NixOS/nixpkgs/issues/132651
     (buildPackages.wrapGAppsHook.override { inherit (buildPackages) makeWrapper; })
   ];
 }
